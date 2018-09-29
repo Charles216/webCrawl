@@ -1,0 +1,28 @@
+{
+  "name": "webCrawl",
+  "version": "1.0.0",
+  "description": "Utilizing Cheerio and Mongoose this site scrapes headlines and links stores them in a database and allows users to interact with one another via discussion inputs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Charles216/webCrawl.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Charles216/webCrawl/issues"
+  },
+  "homepage": "https://github.com/Charles216/webCrawl#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.3",
+    "express-handlebars": "^3.0.0",
+    "mongoose": "^5.3.0"
+  }
+}
