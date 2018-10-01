@@ -1,29 +1,95 @@
-var cheerio = require("cheerio");
-var request = require("request");
+const express = require("express");
+const logger = require("morgan");
+const mongoose = require("mongoose");
 
+const axios = require("axios");
+const cheerio = require("cheerio");
+
+const db = require("./models");
+
+const PORT = 3000;
+
+const app = express();
+
+app.use(logger("dev"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static("public"));
+
+mongoose.connect(
+  "mongodb://localhost/scrapedNews",
+  { useNewUrlParser: true }
+);
+
+// Routes
+//+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+
 console.log(`**Headline/Summary/URL/Photo?**`);
 
-request("http://www.chicagotribune.com/news/local/breaking/#", function(
-  error,
-  response,
-  html
-) {
-  var $ = cheerio.load(html);
+app.get("/scrape", function(req, res) {
+  axios.get("http://www.echojs.com/").then(function(response) {
+    const $ = cheerio.load(response.data);
 
-  var results = [];
+    $("articleh2").each(function(i, element) {
+      const results = {};
 
-  $("h3.trb_outfit_relatedListTitle").each(function(i, element) {
-    var title = $(element).text();
-    var link = $(element)
-      .children()
-      .attr("href");
-    //var summary = $("p.trb_outfit_group_list_item_brief").text();
+      results.title = $(this)
+        .children("a")
+        .text();
+      results.link = $(this)
+        .children("a")
+        .attr("href");
 
-    results.push({
-      title: title,
-      link: link
-      //summary: summary
+      db.Article.create(result)
+        .then(function(dbArtcile) {
+          console.log(dbArticle);
+        })
+        .catch(function(err) {
+          return res.json(err);
+        });
     });
+
+    res.send("Scrape completed");
   });
-  console.log(results);
+});
+
+app.get("/articles", function(req, res) {
+  db.Article.find({})
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
+app.get("articles/:id", function(req, res) {
+  db.Article.findOne({ _id: req.params.id })
+    .populate("note")
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
+app.post("articles/:id", function(req, res) {
+  db.Note.create(req.body)
+    .then(function(dbNote) {
+      return db.Article.findOneAndUpdate(
+        { _id: req.params.id },
+        { note: dbNote._id },
+        { new: true }
+      );
+    })
+    .then(function(dbArtcile) {
+      res, json(dbArtcile);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
+app.listen(PORT, function() {
+  console.log("App is running live on: ", PORT + "  🌎!");
 });
